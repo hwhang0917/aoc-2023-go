@@ -1,11 +1,12 @@
 package utils
 
 import (
+	"bufio"
 	"log"
 	"os"
 )
 
-func ReadFile() *os.File {
+func ReadFileEachLine() []string {
 	// Read file from command line argument or use default filename
 	var filename string
 	if len(os.Args) > 1 {
@@ -17,9 +18,16 @@ func ReadFile() *os.File {
 
 	// open file
 	file, err := os.Open(filename)
+	defer file.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return file
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	return lines
 }

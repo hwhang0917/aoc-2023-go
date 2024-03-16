@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,12 +9,10 @@ import (
 	"github.com/hwhang0917/aoc-2023-go/utils"
 )
 
-func partOneSolution(file *os.File) string {
-	scanner := bufio.NewScanner(file)
+func partOneSolution(lines []string) string {
 	numregex := regexp.MustCompile(`\d`)
 	var calibrations []int
-	for scanner.Scan() {
-		line := scanner.Text()
+	for _, line := range lines {
 		matches := numregex.FindAllString(line, -1)
 		var numbers []int
 		for _, match := range matches {
@@ -33,13 +29,10 @@ func partOneSolution(file *os.File) string {
 	for _, calibration := range calibrations {
 		solution += calibration
 	}
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
 	return strconv.Itoa(solution)
 }
 
-func partTwoSolution(file *os.File) string {
+func partTwoSolution(lines []string) string {
 	numericStringMap := map[string]int{
 		"zero":  0,
 		"one":   1,
@@ -57,14 +50,12 @@ func partTwoSolution(file *os.File) string {
 		keys = append(keys, k)
 	}
 
-	scanner := bufio.NewScanner(file)
 	regexString := strings.Join([]string{"(", `\d|`, strings.Join(keys, "|"), ")"}, "")
 
 	numregex := regexp.MustCompile(regexString)
 
 	var calibrations []int
-	for scanner.Scan() {
-		line := scanner.Text()
+	for _, line := range lines {
 		matches := numregex.FindAllString(line, -1)
 		var numbers []int
 		for _, match := range matches {
@@ -88,16 +79,12 @@ func partTwoSolution(file *os.File) string {
 	for _, calibration := range calibrations {
 		solution += calibration
 	}
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
 	return strconv.Itoa(solution)
 }
 
 func main() {
-	input := utils.ReadFile()
-	defer input.Close()
+	lines := utils.ReadFileEachLine()
 
-	// fmt.Println("Part I: ", partOneSolution(input))
-	fmt.Println("Part II: ", partTwoSolution(input))
+	fmt.Println("Part I: ", partOneSolution(lines))
+	fmt.Println("Part II: ", partTwoSolution(lines))
 }
