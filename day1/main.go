@@ -2,89 +2,88 @@ package main
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/hwhang0917/aoc-2023-go/utils"
 )
 
-func partOneSolution(lines []string) string {
-	numregex := regexp.MustCompile(`\d`)
-	var calibrations []int
-	for _, line := range lines {
-		matches := numregex.FindAllString(line, -1)
-		var numbers []int
-		for _, match := range matches {
-			num, _ := strconv.Atoi(match)
-			numbers = append(numbers, num)
-		}
-		if len(numbers) == 1 {
-			calibrations = append(calibrations, numbers[0]*11)
-		} else {
-			calibrations = append(calibrations, numbers[0]*10+numbers[len(numbers)-1])
-		}
-	}
-	solution := 0
-	for _, calibration := range calibrations {
-		solution += calibration
-	}
-	return strconv.Itoa(solution)
+var numericStringMap = map[string]int{
+	"one":   1,
+	"two":   2,
+	"three": 3,
+	"four":  4,
+	"five":  5,
+	"six":   6,
+	"seven": 7,
+	"eight": 8,
+	"nine":  9,
 }
 
-func partTwoSolution(lines []string) string {
-	numericStringMap := map[string]int{
-		"zero":  0,
-		"one":   1,
-		"two":   2,
-		"three": 3,
-		"four":  4,
-		"five":  5,
-		"six":   6,
-		"seven": 7,
-		"eight": 8,
-		"nine":  9,
+func containsNumericString(s string) (bool, int) {
+	for k, v := range numericStringMap {
+		if strings.Contains(s, k) {
+			return true, v
+		}
 	}
-	var keys []string
-	for k := range numericStringMap {
-		keys = append(keys, k)
-	}
+	return false, 0
+}
 
-	regexString := strings.Join([]string{"(", `\d|`, strings.Join(keys, "|"), ")"}, "")
-
-	numregex := regexp.MustCompile(regexString)
-
-	var calibrations []int
+func partOne(lines []string) int {
+	totalCalibration := 0
 	for _, line := range lines {
-		matches := numregex.FindAllString(line, -1)
-		var numbers []int
-		for _, match := range matches {
-			if num, ok := numericStringMap[match]; ok {
-				numbers = append(numbers, num)
-				continue
-			} else {
-				num, _ := strconv.Atoi(match)
-				numbers = append(numbers, num)
+		var firstDigit, secondDigit int
+		// Get first digit
+		for i := 0; i < len(line); i++ {
+			if unicode.IsDigit(rune(line[i])) {
+				firstDigit = int(line[i] - '0')
+				break
 			}
 		}
-
-		if len(numbers) == 1 {
-			calibrations = append(calibrations, numbers[0]*11)
-		} else {
-			calibrations = append(calibrations, numbers[0]*10+numbers[len(numbers)-1])
+		// Get last last digit
+		for i := len(line) - 1; i >= 0; i-- {
+			if unicode.IsDigit(rune(line[i])) {
+				secondDigit = int(line[i] - '0')
+				break
+			}
 		}
+		totalCalibration += (firstDigit*10 + secondDigit)
 	}
+	return totalCalibration
+}
 
-	solution := 0
-	for _, calibration := range calibrations {
-		solution += calibration
+func partTwo(lines []string) int {
+	totalCalibration := 0
+	for _, line := range lines {
+		var firstDigit, secondDigit int
+		// Get first digit
+		for i := 0; i < len(line); i++ {
+			if found, d := containsNumericString(line[:i]); found {
+				firstDigit = d
+				break
+			} else if unicode.IsDigit(rune(line[i])) {
+				firstDigit = int(line[i] - '0')
+				break
+			}
+		}
+		// Get last last digit
+		for i := len(line) - 1; i >= 0; i-- {
+			if found, d := containsNumericString(line[i:]); found {
+				secondDigit = d
+				break
+			} else if unicode.IsDigit(rune(line[i])) {
+				secondDigit = int(line[i] - '0')
+				break
+			}
+		}
+		totalCalibration += (firstDigit*10 + secondDigit)
 	}
-	return strconv.Itoa(solution)
+	return totalCalibration
 }
 
 func main() {
 	lines := utils.ReadFileEachLine()
 
-	fmt.Println("Part I: ", partOneSolution(lines))
-	fmt.Println("Part II: ", partTwoSolution(lines))
+	fmt.Println("Part I: ", partOne(lines))
+	fmt.Println("Part II: ", partTwo(lines))
 }
